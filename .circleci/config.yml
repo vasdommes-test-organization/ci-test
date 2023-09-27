@@ -26,7 +26,7 @@ commands:
       - docker-load
       - docker/push:
           step-name: Docker push vasdommes/ci_test:<<parameters.tag>>
-          image: vasdommes/ci-test:$CIRCLE_SHA1
+          image: vasdommes/ci-test
           tag: <<parameters.tag>>
 
 # Jobs to be invoked later in a workflow.
