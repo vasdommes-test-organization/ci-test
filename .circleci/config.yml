@@ -6,7 +6,7 @@ orbs:
 # Reusable commands
 # See https://circleci.com/docs/reusing-config/
 commands:
-  docker-load:
+  docker-load-ci-test:
     description: Load ci-test and ci-test-test images from workspace
     steps:
       - attach_workspace:
@@ -17,13 +17,15 @@ commands:
           command: |
             docker image load < "images/ci-test"
             docker image load < "images/ci-test-test"
-  docker-deploy:
+  docker-deploy-ci-test:
     description: Push ci-test image to DockerHub
     parameters:
       tag:
         type: string
     steps:
-      - docker-load
+      - docker-load-ci-test
+      - run: docker tag ci-test vasdommes/ci_test:<<parameters.tag>>
+      # - run: docker push ci-test vasdommes/ci_test:<<parameters.tag>>
       - docker/push:
           step-name: Docker push vasdommes/ci_test:<<parameters.tag>>
           image: vasdommes/ci-test
@@ -33,27 +35,20 @@ commands:
 # See: https://circleci.com/docs/configuration-reference/#jobs
 jobs:
   build:
-    executor: docker/docker
+    docker:
+      - image: cimg/base:stable
     steps:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
-      - docker/check
-      - docker/build:
-          step-name: Docker Build ci-test
-          tag: $CIRCLE_SHA1
-          image: vasdommes/ci-test
-      - docker/build:
-          step-name: Docker Build ci-test-test
-          image: vasdommes/ci-test-test
-          tag: $CIRCLE_SHA1
-          extra_build_args: "--target test"
+      - run: docker build . --tag ci-test
+      - run: docker build . --tag ci-test-test --target test
       - run:
           step-name: Save images to workspace
           command: |
             mkdir -p images
-            docker image save -o "images/ci-test" "vasdommes/ci-test"
-            docker image save -o "images/ci-test-test" "vasdommes/ci-test-test"
+            docker image save -o "images/ci-test" "ci-test"
+            docker image save -o "images/ci-test-test" "ci-test-test"
       - persist_to_workspace:
           root: .
           paths:
@@ -68,8 +63,13 @@ jobs:
   deploy-master:
     executor: docker/docker
     steps:
-      - docker-deploy:
+      - docker-deploy-ci-test:
           tag: master
+  deploy-tag:
+    executor: docker/docker
+    steps:
+      - docker-deploy-ci-test:
+          tag: $CIRCLE_TAG
       
       
 # See: https://circleci.com/docs/configuration-reference/#workflows
@@ -84,6 +84,16 @@ workflows:
           filters:
             branches:
               only: main
+          requires:
+            - build
+            - test         
+      - deploy-tag:
+          filters:
+            branches:
+              only: main
+            tags:
+              # Matching tags: "major.minor.patch", e.g. 2.10.1
+              only: /^[0-9]+\.[0-9]+\.[0-9]+/
           requires:
             - build
             - test         
