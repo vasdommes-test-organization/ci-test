@@ -39,6 +39,7 @@ jobs:
       - run:
           name: Load images
           command: |
+            cd ./images
             docker image load < "ci-test"
             docker image load < "ci-test-test"
       - run: docker run ci-test ls
