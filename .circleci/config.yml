@@ -103,6 +103,9 @@ workflows:
             tags:
               # Matching tags: "major.minor.patch", e.g. 2.10.1
               only: /^[0-9]+\.[0-9]+\.[0-9]+/
+            # For some reason you need this as well: https://discuss.circleci.com/t/tag-not-triggered-by-circleci-not-filter-in-workflow/32036
+            branches:
+              ignore: /.*/
           requires:
             - build
             - test         
