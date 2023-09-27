@@ -10,7 +10,7 @@ commands:
           at: .
       - setup_remote_docker
       - run:
-          name: Load images
+          step-name: Load images
           command: |
             docker image load < "images/ci-test"
             docker image load < "images/ci-test-test"
