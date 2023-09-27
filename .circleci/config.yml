@@ -5,6 +5,8 @@ orbs:
 
 jobs:
   build:
+    docker:
+      - image: cimg/base:stable
     executor: docker
     steps:
       - setup_remote_docker
