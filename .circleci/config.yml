@@ -22,11 +22,8 @@ jobs:
           step-name: Save images to workspace
           command: |
             mkdir -p images
-            cd images
-            docker image save -o "ci-test" "ci-test"
-            docker image save -o "ci-test-test" "ci-test-test"
-      - run: ls .
-      - run: ls ./images/
+            docker image save -o "images/ci-test" "ci-test"
+            docker image save -o "images/ci-test-test" "ci-test-test"
       - persist_to_workspace:
           root: .
           paths:
@@ -35,11 +32,8 @@ jobs:
     executor: docker/docker
     steps:
       - attach_workspace:
-          at: ./images
+          at: .
       - setup_remote_docker
-      - run: ls .
-      - run: ls ./images/
-      - run: ls ./images/images/
       - run:
           name: Load images
           command: |
