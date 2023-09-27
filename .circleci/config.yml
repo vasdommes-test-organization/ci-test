@@ -15,20 +15,20 @@ jobs:
           step-name: Docker Build ci-test
           image: ci-test
       - docker/build:
-        step-name: Docker Build ci-test-test
+          step-name: Docker Build ci-test-test
           image: ci-test-test
           extra_build_args: "--target test"
-      - run
-        step-name: Save images to workspace
-        command: |
-          mkdir -p images
-          cd images
-          docker image save -o "ci-test" "ci-test"
-          docker image save -o "ci-test-test" "ci-test-test"
+      - run:
+          step-name: Save images to workspace
+          command: |
+            mkdir -p images
+            cd images
+            docker image save -o "ci-test" "ci-test"
+            docker image save -o "ci-test-test" "ci-test-test"
       - persist_to_workspace:
-        root: .
-        paths:
-          - images
+          root: .
+          paths:
+            - images
   test:
     executor: docker
     steps:
