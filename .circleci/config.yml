@@ -26,7 +26,7 @@ commands:
       - docker-load-ci-test
       - run: docker tag ci-test vasdommes/ci_test
       # - run: docker push ci-test vasdommes/ci_test:<<parameters.tag>>
-      - run: docker ls
+      - run: docker image ls
       - run: echo <<parameters.tag>>
       - docker/push:
           step-name: Docker push vasdommes/ci_test:<<parameters.tag>>
@@ -110,4 +110,4 @@ workflows:
               ignore: /.*/
           requires:
             - build
-            - test         
+            - test
