@@ -9,9 +9,9 @@ jobs:
       - image: cimg/base:stable
     executor: docker
     steps:
+      - checkout
       - setup_remote_docker
           docker_layer_caching: true
-      - checkout
       - docker/check
       - docker/build:
           step-name: Docker Build ci-test
