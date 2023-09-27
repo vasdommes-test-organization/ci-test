@@ -23,7 +23,7 @@ commands:
       tag:
         type: string
     steps:
-      - load
+      - docker-load
       - docker/push:
           step-name: Docker push vasdommes/ci_test:<<parameters.tag>>
           image: vasdommes/ci-test:$CIRCLE_SHA1
