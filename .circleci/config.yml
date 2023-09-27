@@ -37,13 +37,13 @@ jobs:
       - run:
           name: Load images
           command: |
+            docker image ls
             cd ./images
             docker image load < "ci-test"
             docker image load < "ci-test-test"
             docker image ls
       - run: docker run ci-test:$CIRCLE_SHA1 ls
       - run: docker run ci-test-test:$CIRCLE_SHA1 ls
-    
 
 # See: https://circleci.com/docs/configuration-reference/#workflows
 workflows:
