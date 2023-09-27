@@ -58,8 +58,8 @@ jobs:
       - image: cimg/base:stable
     steps:
       - docker-load-ci-test
-      - run: docker run vasdommes/ci-test:$CIRCLE_SHA1 ls
-      - run: docker run vasdommes/ci-test-test:$CIRCLE_SHA1 ls
+      - run: docker run ci-test ls
+      - run: docker run ci-test-test ls
       
   deploy-master:
     executor: docker/docker
