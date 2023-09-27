@@ -5,7 +5,7 @@ orbs:
 
 jobs:
   build:
-    executor: docker
+    executor: docker/docker
     steps:
       - checkout
       - setup_remote_docker:
@@ -30,7 +30,7 @@ jobs:
           paths:
             - images
   test:
-    executor: docker
+    executor: docker/docker
     steps:
       - attach_workspace:
           at: ./images
