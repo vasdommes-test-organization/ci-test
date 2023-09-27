@@ -2,24 +2,35 @@ version: 2.1
 # See: https://circleci.com/developer/orbs/orb/circleci/docker
 orbs:
   docker: circleci/docker@2.4.0
+
+# Reusable commands
+# See https://circleci.com/docs/reusing-config/
 commands:
-  deploy:
-    description: Push ci-test image to DockerHub
-    parameters:
-      tag:
-        type: string
+  docker-load:
+    description: Load ci-test and ci-test-test images from workspace
     steps:
       - attach_workspace:
           at: .
       - setup_remote_docker
       - run:
-          name: Load image
-          command: docker image load < "images/ci-test"
+          step-name: Load images
+          command: |
+            docker image load < "images/ci-test"
+            docker image load < "images/ci-test-test"
+  docker-deploy:
+    description: Push ci-test image to DockerHub
+    parameters:
+      tag:
+        type: string
+    steps:
+      - docker-load
       - docker/push:
-          step-name: Docker push ci_test:<<parameters.tag>>
-          image: ci-test:$CIRCLE_SHA1
+          step-name: Docker push vasdommes/ci_test:<<parameters.tag>>
+          image: vasdommes/ci-test:$CIRCLE_SHA1
           tag: <<parameters.tag>>
 
+# Jobs to be invoked later in a workflow.
+# See: https://circleci.com/docs/configuration-reference/#jobs
 jobs:
   build:
     executor: docker/docker
@@ -30,17 +41,19 @@ jobs:
       - docker/check
       - docker/build:
           step-name: Docker Build ci-test
-          image: ci-test
+          tag: $CIRCLE_SHA1
+          image: vasdommes/ci-test
       - docker/build:
           step-name: Docker Build ci-test-test
-          image: ci-test-test
+          image: vasdommes/ci-test-test
+          tag: $CIRCLE_SHA1
           extra_build_args: "--target test"
       - run:
           step-name: Save images to workspace
           command: |
             mkdir -p images
-            docker image save -o "images/ci-test" "ci-test"
-            docker image save -o "images/ci-test-test" "ci-test-test"
+            docker image save -o "images/ci-test" "vasdommes/ci-test"
+            docker image save -o "images/ci-test-test" "vasdommes/ci-test-test"
       - persist_to_workspace:
           root: .
           paths:
@@ -48,21 +61,14 @@ jobs:
   test:
     executor: docker/docker
     steps:
-      - attach_workspace:
-          at: .
-      - setup_remote_docker
-      - run:
-          name: Load images
-          command: |
-            docker image load < "images/ci-test"
-            docker image load < "images/ci-test-test"
-      - run: docker run ci-test:$CIRCLE_SHA1 ls
-      - run: docker run ci-test-test:$CIRCLE_SHA1 ls
+      - docker-load
+      - run: docker run vasdommes/ci-test:$CIRCLE_SHA1 ls
+      - run: docker run vasdommes/ci-test-test:$CIRCLE_SHA1 ls
       
   deploy-master:
     executor: docker/docker
     steps:
-      - deploy:
+      - docker-deploy:
           tag: master
       
       
