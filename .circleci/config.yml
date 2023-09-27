@@ -24,7 +24,7 @@ commands:
         type: string
     steps:
       - docker-load-ci-test
-      - run: docker tag ci-test vasdommes/ci_test:<<parameters.tag>>
+      - run: docker tag ci-test vasdommes/ci_test
       # - run: docker push ci-test vasdommes/ci_test:<<parameters.tag>>
       - docker/push:
           step-name: Docker push vasdommes/ci_test:<<parameters.tag>>
@@ -60,7 +60,12 @@ jobs:
       - docker-load-ci-test
       - run: docker run ci-test ls
       - run: docker run ci-test-test ls
-      
+          
+  deploy-sha:
+    executor: docker/docker
+    steps:
+      - docker-deploy-ci-test:
+          tag: $CIRCLE_SHA1
   deploy-master:
     executor: docker/docker
     steps:
@@ -69,6 +74,7 @@ jobs:
   deploy-tag:
     executor: docker/docker
     steps:
+      - run: echo $CIRCLE_TAG
       - docker-deploy-ci-test:
           tag: $CIRCLE_TAG
       
@@ -81,6 +87,10 @@ workflows:
       - test:
           requires:
             - build
+      - deploy-sha:
+          requires:
+            - build
+            - test 
       - deploy-master:
           filters:
             branches:
@@ -90,8 +100,6 @@ workflows:
             - test         
       - deploy-tag:
           filters:
-            branches:
-              only: main
             tags:
               # Matching tags: "major.minor.patch", e.g. 2.10.1
               only: /^[0-9]+\.[0-9]+\.[0-9]+/
