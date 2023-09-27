@@ -37,14 +37,27 @@ jobs:
       - run:
           name: Load images
           command: |
-            docker image ls
-            cd ./images
-            docker image load < "ci-test"
-            docker image load < "ci-test-test"
-            docker image ls
+            docker image load < "images/ci-test"
+            docker image load < "images/ci-test-test"
       - run: docker run ci-test:$CIRCLE_SHA1 ls
       - run: docker run ci-test-test:$CIRCLE_SHA1 ls
-
+      
+  deploy-master:
+    executor: docker/docker
+    steps:
+      - attach_workspace:
+          at: .
+      - setup_remote_docker
+      - run:
+          name: Load images
+          command: |
+            docker image load < "images/ci-test"
+            docker image load < "images/ci-test-test"
+      - docker/push:
+          step-name: Docker push ci_test:master
+          image: ci-test:$CIRCLE_SHA1
+          tag: master
+      
 # See: https://circleci.com/docs/configuration-reference/#workflows
 workflows:
   build-and-test:
@@ -53,3 +66,10 @@ workflows:
       - test:
           requires:
             - build
+      - deploy-master:
+          filters:
+            branches:
+              only: master
+          requires:
+            - build
+            - test         
