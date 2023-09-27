@@ -10,7 +10,7 @@ RUN mkdir -p newdir
 FROM alpine:3.18 as install
 WORKDIR /usr/local/src/ci-test
 
-COPY --from=build newdir newdir
+COPY --from=build /usr/local/src/ci-test/newdir /usr/local/src/ci-test/newdir
 
 FROM install as test
 RUN mkdir -p newdir/test && \
