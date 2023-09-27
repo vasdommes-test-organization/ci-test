@@ -2,6 +2,23 @@ version: 2.1
 # See: https://circleci.com/developer/orbs/orb/circleci/docker
 orbs:
   docker: circleci/docker@2.4.0
+commands:
+  deploy:
+    description: Push ci-test image to DockerHub
+    parameters:
+      tag:
+        type: string
+    steps:
+      - attach_workspace:
+          at: .
+      - setup_remote_docker
+      - run:
+          name: Load image
+          command: docker image load < "images/ci-test"
+      - docker/push:
+          step-name: Docker push ci_test:<<parameters.tag>>
+          image: ci-test:$CIRCLE_SHA1
+          tag: <<parameters.tag>>
 
 jobs:
   build:
@@ -45,18 +62,9 @@ jobs:
   deploy-master:
     executor: docker/docker
     steps:
-      - attach_workspace:
-          at: .
-      - setup_remote_docker
-      - run:
-          name: Load images
-          command: |
-            docker image load < "images/ci-test"
-            docker image load < "images/ci-test-test"
-      - docker/push:
-          step-name: Docker push ci_test:master
-          image: ci-test:$CIRCLE_SHA1
+      - deploy:
           tag: master
+      
       
 # See: https://circleci.com/docs/configuration-reference/#workflows
 workflows:
@@ -69,7 +77,7 @@ workflows:
       - deploy-master:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - build
             - test         
