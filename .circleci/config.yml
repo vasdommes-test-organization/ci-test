@@ -5,12 +5,10 @@ orbs:
 
 jobs:
   build:
-    docker:
-      - image: cimg/base:stable
     executor: docker
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
           docker_layer_caching: true
       - docker/check
       - docker/build:
