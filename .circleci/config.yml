@@ -39,6 +39,7 @@ jobs:
       - setup_remote_docker
       - run: ls .
       - run: ls ./images/
+      - run: ls ./images/images/
       - run:
           name: Load images
           command: |
