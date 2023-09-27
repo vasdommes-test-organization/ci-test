@@ -1,7 +1,10 @@
-version: 2.1
+-version: 2.1
 # See: https://circleci.com/developer/orbs/orb/circleci/docker
 orbs:
   docker: circleci/docker@2.4.0
+
+# Reusable commands
+# See https://circleci.com/docs/reusing-config/
 commands:
   docker-load:
     description: Load ci-test and ci-test-test images from workspace
@@ -26,6 +29,8 @@ commands:
           image: vasdommes/ci-test:$CIRCLE_SHA1
           tag: <<parameters.tag>>
 
+# Jobs to be invoked later in a workflow.
+# See: https://circleci.com/docs/configuration-reference/#jobs
 jobs:
   build:
     executor: docker/docker
@@ -63,7 +68,7 @@ jobs:
   deploy-master:
     executor: docker/docker
     steps:
-      - deploy:
+      - docker-deploy:
           tag: master
       
       
