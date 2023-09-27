@@ -42,10 +42,10 @@ jobs:
       - docker/build:
           step-name: Docker Build ci-test
           tag: $CIRCLE_SHA1
-          image: ci-test
+          image: vasdommes/ci-test
       - docker/build:
           step-name: Docker Build ci-test-test
-          image: ci-test-test
+          image: vasdommes/ci-test-test
           tag: $CIRCLE_SHA1
           extra_build_args: "--target test"
       - run:
