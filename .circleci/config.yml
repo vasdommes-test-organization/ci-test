@@ -1,0 +1,75 @@
+version: 2.1
+# See: https://circleci.com/developer/orbs/orb/circleci/docker
+orbs:
+  docker: circleci/docker@2.4.0
+
+jobs:
+  build:
+    executor: docker/docker
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - docker/check
+      - docker/build:
+          step-name: Docker Build ci-test
+          image: ci-test
+      - docker/build:
+          step-name: Docker Build ci-test-test
+          image: ci-test-test
+          extra_build_args: "--target test"
+      - run:
+          step-name: Save images to workspace
+          command: |
+            mkdir -p images
+            docker image save -o "images/ci-test" "ci-test"
+            docker image save -o "images/ci-test-test" "ci-test-test"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - images
+  test:
+    executor: docker/docker
+    steps:
+      - attach_workspace:
+          at: .
+      - setup_remote_docker
+      - run:
+          name: Load images
+          command: |
+            docker image load < "images/ci-test"
+            docker image load < "images/ci-test-test"
+      - run: docker run ci-test:$CIRCLE_SHA1 ls
+      - run: docker run ci-test-test:$CIRCLE_SHA1 ls
+      
+  deploy-master:
+    executor: docker/docker
+    steps:
+      - attach_workspace:
+          at: .
+      - setup_remote_docker
+      - run:
+          name: Load images
+          command: |
+            docker image load < "images/ci-test"
+            docker image load < "images/ci-test-test"
+      - docker/push:
+          step-name: Docker push ci_test:master
+          image: ci-test:$CIRCLE_SHA1
+          tag: master
+      
+# See: https://circleci.com/docs/configuration-reference/#workflows
+workflows:
+  build-and-test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - deploy-master:
+          filters:
+            branches:
+              only: master
+          requires:
+            - build
+            - test         
