@@ -25,6 +25,8 @@ jobs:
             cd images
             docker image save -o "ci-test" "ci-test"
             docker image save -o "ci-test-test" "ci-test-test"
+      - run: ls .
+      - run: ls ./images/
       - persist_to_workspace:
           root: .
           paths:
