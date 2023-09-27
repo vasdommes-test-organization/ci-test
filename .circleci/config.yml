@@ -54,9 +54,10 @@ jobs:
           paths:
             - images
   test:
-    executor: docker/docker
+    docker:
+      - image: cimg/base:stable
     steps:
-      - docker-load
+      - docker-load-ci-test
       - run: docker run vasdommes/ci-test:$CIRCLE_SHA1 ls
       - run: docker run vasdommes/ci-test-test:$CIRCLE_SHA1 ls
       
