@@ -27,7 +27,7 @@ commands:
       - run:
           step-name: Login and push to Docker.io
           command: |
-            docker login -u vasdommes -p $DOCKER_PASSWORD 
+            docker login --username vasdommes --password $DOCKER_PASSWORD 
             docker tag ci-test vasdommes/ci-test:<< parameters.tag >>
             docker push vasdommes/ci-test:<< parameters.tag >>
 
