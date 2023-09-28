@@ -6,6 +6,7 @@ orbs:
 # Reusable commands
 # See https://circleci.com/docs/reusing-config/
 commands:
+
   docker-load-ci-test:
     description: Load ci-test and ci-test-test images from workspace
     steps:
@@ -17,19 +18,34 @@ commands:
           command: |
             docker image load < "images/ci-test"
             docker image load < "images/ci-test-test"
+  
   docker-deploy-ci-test:
     description: Push ci-test image to DockerHub
     parameters:
       tag:
         type: string
+      full-image-tag:
+        type: string
+        default: vasdommes/ci_test:<< parameters.tag >>
     steps:
       - docker-load-ci-test
-      - run: docker tag ci-test vasdommes/ci_test:<<parameters.tag>>
-      # - run: docker push ci-test vasdommes/ci_test:<<parameters.tag>>
-      - docker/push:
-          step-name: Docker push vasdommes/ci_test:<<parameters.tag>>
-          image: vasdommes/ci-test
-          tag: <<parameters.tag>>
+      - run: IMAGE_TAG=vasdommes/ci_test:<< parameters.tag >>
+      - run: echo tag=<< parameters.tag >>
+      - run: echo full-image-tag=<< parameters.full-image-tag >>
+      - run:
+          step-name: Login and push to Docker.io
+          command: |
+            echo $DOCKER_PASSWORD | docker login -u vasdommes --password-stdin
+            docker tag ci-test vasdommes/ci_test:<< parameters.tag >>
+            docker push vasdommes/ci_test:<< parameters.tag >>
+      # - run: docker push ci-test vasdommes/ci_test:<< parameters.tag >>
+      # - run: docker image ls
+      # - run: echo <<parameters.tag>>
+      # - docker/push:
+      #     step-name: Docker push vasdommes/ci_test:<< parameters.tag >>
+      #     image: vasdommes/ci-test
+      #     tag: << parameters.tag >>
+
 
 # Jobs to be invoked later in a workflow.
 # See: https://circleci.com/docs/configuration-reference/#jobs
@@ -60,27 +76,42 @@ jobs:
       - docker-load-ci-test
       - run: docker run ci-test ls
       - run: docker run ci-test-test ls
-      
-  deploy-master:
+          
+  deploy-sha:
     executor: docker/docker
     steps:
       - docker-deploy-ci-test:
+          tag: $CIRCLE_SHA1
+          
+  deploy-master:
+    # executor: docker/docker
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - docker-deploy-ci-test:
           tag: master
+          
   deploy-tag:
     executor: docker/docker
     steps:
+      - run: echo $CIRCLE_TAG
       - docker-deploy-ci-test:
           tag: $CIRCLE_TAG
       
       
 # See: https://circleci.com/docs/configuration-reference/#workflows
 workflows:
-  build-and-test:
+  build-test-deploy:
     jobs:
       - build
       - test:
           requires:
             - build
+      # TODO remove
+      - deploy-sha:
+          requires:
+            - build
+            - test 
       - deploy-master:
           filters:
             branches:
@@ -90,11 +121,12 @@ workflows:
             - test         
       - deploy-tag:
           filters:
-            branches:
-              only: main
             tags:
               # Matching tags: "major.minor.patch", e.g. 2.10.1
               only: /^[0-9]+\.[0-9]+\.[0-9]+/
+            # For some reason you need this as well: https://discuss.circleci.com/t/tag-not-triggered-by-circleci-not-filter-in-workflow/32036
+            branches:
+              ignore: /.*/
           requires:
             - build
-            - test         
+            - test
