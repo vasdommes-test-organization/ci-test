@@ -6,6 +6,7 @@ orbs:
 # Reusable commands
 # See https://circleci.com/docs/reusing-config/
 commands:
+
   docker-load-ci-test:
     description: Load ci-test and ci-test-test images from workspace
     steps:
@@ -17,6 +18,7 @@ commands:
           command: |
             docker image load < "images/ci-test"
             docker image load < "images/ci-test-test"
+  
   docker-deploy-ci-test:
     description: Push ci-test image to DockerHub
     parameters:
@@ -35,16 +37,7 @@ commands:
           command: |
             echo $DOCKER_PASSWORD | docker login -u vasdommes --password-stdin
             docker tag ci-test vasdommes/ci_test:<< parameters.tag >>
-            # docker tag ci-test vasdommes/ci_test
             docker push vasdommes/ci_test:<< parameters.tag >>
-      - run: 
-          step-name: Pull and test
-          command: |
-            docker images
-            # docker image prune -a
-            docker pull vasdommes/ci-test:<< parameters.tag >>
-            docker images
-            docker run vasdommes/ci-test:<< parameters.tag >> ls
       # - run: docker push ci-test vasdommes/ci_test:<< parameters.tag >>
       # - run: docker image ls
       # - run: echo <<parameters.tag>>
@@ -52,6 +45,7 @@ commands:
       #     step-name: Docker push vasdommes/ci_test:<< parameters.tag >>
       #     image: vasdommes/ci-test
       #     tag: << parameters.tag >>
+
 
 # Jobs to be invoked later in a workflow.
 # See: https://circleci.com/docs/configuration-reference/#jobs
@@ -88,6 +82,7 @@ jobs:
     steps:
       - docker-deploy-ci-test:
           tag: $CIRCLE_SHA1
+          
   deploy-master:
     # executor: docker/docker
     docker:
@@ -95,6 +90,7 @@ jobs:
     steps:
       - docker-deploy-ci-test:
           tag: master
+          
   deploy-tag:
     executor: docker/docker
     steps:
@@ -111,6 +107,7 @@ workflows:
       - test:
           requires:
             - build
+      # TODO remove
       - deploy-sha:
           requires:
             - build
