@@ -41,7 +41,7 @@ commands:
           step-name: Pull and test
           command: |
             docker images
-            docker image prune -a
+            # docker image prune -a
             docker pull vasdommes/ci-test:<< parameters.tag >>
             docker images
             docker run vasdommes/ci-test:<< parameters.tag >> ls
@@ -89,7 +89,9 @@ jobs:
       - docker-deploy-ci-test:
           tag: $CIRCLE_SHA1
   deploy-master:
-    executor: docker/docker
+    # executor: docker/docker
+    docker:
+      - image: cimg/base:stable
     steps:
       - docker-deploy-ci-test:
           tag: master
