@@ -24,14 +24,15 @@ commands:
         type: string
     steps:
       - docker-load-ci-test
-      - run: docker tag ci-test vasdommes/ci_test:<<parameters.tag>>
+      - run: docker tag ci-test todo/ci_test:<<parameters.tag>>
       - run: docker image ls
-      - run: echo vasdommes/ci_test:<<parameters.tag>>
+      - run: docker run todo/ci_test:<<parameters.tag>> ls
+      - run: echo todo/ci_test:<<parameters.tag>>
       - run:
           step-name: Login and push to Docker.io
           command: |
             echo $DOCKER_PASSWORD | docker login -u $DOCKER_LOGIN --password-stdin
-            docker push vasdommes/ci-test:<<parameters.tag>>
+            docker push todo/ci-test:<<parameters.tag>>
       # - run: docker push ci-test vasdommes/ci_test:<<parameters.tag>>
       # - run: docker image ls
       # - run: echo <<parameters.tag>>
