@@ -30,7 +30,7 @@ commands:
       - run: echo <<parameters.tag>>
       - docker/push:
           step-name: Docker push vasdommes/ci_test:<<parameters.tag>>
-          image: vasdommes/ci-test
+          image: vasdommes/ci-test:<<parameters.tag>>
           tag: <<parameters.tag>>
 
 # Jobs to be invoked later in a workflow.
