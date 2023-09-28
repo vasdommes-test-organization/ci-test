@@ -24,7 +24,7 @@ commands:
         type: string
     steps:
       - docker-load-ci-test
-      - run: docker tag ci-test vasdommes/ci_test
+      - run: docker tag ci-test vasdommes/ci_test:<<parameters.tag>>
       # - run: docker push ci-test vasdommes/ci_test:<<parameters.tag>>
       - run: docker image ls
       - run: echo <<parameters.tag>>
