@@ -22,10 +22,14 @@ commands:
     parameters:
       tag:
         type: string
+      full-image-tag:
+        type: string
+        default: vasdommes/ci_test:<< parameters.tag >>
     steps:
       - docker-load-ci-test
       - run: IMAGE_TAG=vasdommes/ci_test:<< parameters.tag >>
-      - run: echo ${IMAGE_TAG}
+      - run: echo tag=<< parameters.tag >>
+      - run: echo full-image-tag=<< parameters.full-image-tag >>
       - run:
           step-name: Login and push to Docker.io
           command: |
@@ -36,10 +40,10 @@ commands:
       - run: 
           step-name: Pull and test
           command: |
-            docker image ls
-            docker prune -a
+            docker images
+            docker image prune -a
             docker pull vasdommes/ci-test:<< parameters.tag >>
-            docker image ls
+            docker images
             docker run vasdommes/ci-test:<< parameters.tag >> ls
       # - run: docker push ci-test vasdommes/ci_test:<< parameters.tag >>
       # - run: docker image ls
