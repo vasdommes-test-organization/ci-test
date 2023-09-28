@@ -103,10 +103,18 @@ jobs:
 workflows:
   build-test-deploy:
     jobs:
-      - build
+      - build:
+          filters:
+            tags:
+              # Matching tags: "major.minor.patch", e.g. 2.10.1
+              only: /^[0-9]+\.[0-9]+\.[0-9]+/
       - test:
           requires:
             - build
+          filters:
+            tags:
+              # Matching tags: "major.minor.patch", e.g. 2.10.1
+              only: /^[0-9]+\.[0-9]+\.[0-9]+/
       # TODO remove
       - deploy-sha:
           requires:
@@ -123,11 +131,13 @@ workflows:
           filters:
             tags:
               # Matching tags: "major.minor.patch", e.g. 2.10.1
-              # only: /^[0-9]+\.[0-9]+\.[0-9]+/
-              only: /.*/
-            # For some reason you need this as well: https://discuss.circleci.com/t/tag-not-triggered-by-circleci-not-filter-in-workflow/32036
-            # branches:
-            #   ignore: /.*/
+              only: /^[0-9]+\.[0-9]+\.[0-9]+/
+              # only: /.*/
+            # See https://discuss.circleci.com/t/tag-not-triggered-by-circleci-not-filter-in-workflow/32036
+            branches:
+              ignore: /.*/
+          # NB: you have to specify tags filter for all dependencied,
+          # See https://circleci.com/docs/configuration-reference/#tags
           requires:
             - build
             - test
