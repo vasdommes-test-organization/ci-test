@@ -25,14 +25,18 @@ commands:
     steps:
       - docker-load-ci-test
       - run: docker tag ci-test vasdommes/ci_test:<<parameters.tag>>
-      - run: docker tag ci-test vasdommes/ci_test
+      - run:
+          step-name: Login and push to Docker.io
+          command: |
+            echo $DOCKER_PASSWORD | docker login -u $DOCKER_LOGIN --password-stdin
+            docker push $DOCKER_LOGIN/ci-test:<<parameters.tag>>
       # - run: docker push ci-test vasdommes/ci_test:<<parameters.tag>>
-      - run: docker image ls
-      - run: echo <<parameters.tag>>
-      - docker/push:
-          step-name: Docker push vasdommes/ci_test:<<parameters.tag>>
-          image: vasdommes/ci-test
-          tag: <<parameters.tag>>
+      # - run: docker image ls
+      # - run: echo <<parameters.tag>>
+      # - docker/push:
+      #     step-name: Docker push vasdommes/ci_test:<<parameters.tag>>
+      #     image: vasdommes/ci-test
+      #     tag: <<parameters.tag>>
 
 # Jobs to be invoked later in a workflow.
 # See: https://circleci.com/docs/configuration-reference/#jobs
