@@ -82,30 +82,29 @@ jobs:
       
 # See: https://circleci.com/docs/configuration-reference/#workflows
 workflows:
+
   build-test-deploy:
     jobs:
       - build:
           filters:
             tags:
               only: /.*/
+              
       - test:
           requires:
             - build
           filters:
             tags:
               only: /.*/
-      # TODO remove
-      - deploy-sha:
-          requires:
-            - build
-            - test 
+              
       - deploy-master:
           filters:
             branches:
               only: main
           requires:
             - build
-            - test         
+            - test
+            
       - deploy-tag:
           filters:
             tags:
