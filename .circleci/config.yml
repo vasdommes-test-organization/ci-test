@@ -31,7 +31,6 @@ commands:
       - docker/push:
           step-name: Docker push vasdommes/ci_test:<<parameters.tag>>
           image: vasdommes/ci-test:<<parameters.tag>>
-          tag: <<parameters.tag>>
 
 # Jobs to be invoked later in a workflow.
 # See: https://circleci.com/docs/configuration-reference/#jobs
