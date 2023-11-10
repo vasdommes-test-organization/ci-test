@@ -88,14 +88,14 @@ workflows:
       - build:
           filters:
             tags:
-              only: /.*/
+              only: /^\d+\.\d+\.\d+$/
               
       - test:
           requires:
             - build
           filters:
             tags:
-              only: /.*/
+              only: /^\d+\.\d+\.\d+$/
               
       - deploy-master:
           filters:
@@ -107,8 +107,9 @@ workflows:
             
       - deploy-tag:
           filters:
+            # deploy only tags like 2.6.0
             tags:
-              only: /.*/
+              only: /^\d+\.\d+\.\d+$/
             # See https://discuss.circleci.com/t/tag-not-triggered-by-circleci-not-filter-in-workflow/32036
             branches:
               ignore: /.*/
